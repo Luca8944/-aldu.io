@@ -2,256 +2,355 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- Esta línea asegura que se vea bien en celulares -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Una carta de Chacarita</title>
-    
-    <!-- Tipografías románticas y legibles -->
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Lora:ital,wght@0,400;1,400&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Para ti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,500&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        /* --- ESTILOS GENERALES --- */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            width: 100%;
             overflow: hidden;
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            background: radial-gradient(circle at center, #3a0000 0%, #0f0000 100%);
             font-family: 'Montserrat', sans-serif;
-            color: white;
-            -webkit-tap-highlight-color: transparent; /* Quita el brillo azul al tocar en Android */
+            color: #ffcccc;
+            user-select: none; /* Evita seleccionar texto al arrastrar */
         }
 
-        /* --- FONDO ESTRELLADO --- */
-        #stars {
-            width: 1px; height: 1px;
-            background: transparent;
-            box-shadow: 10px 10px #FFF, 20px 50px #FFF, 100px 80px #FFF, 250px 10px #FFF, 400px 400px #FFF, 20px 500px #FFF, 150px 200px #FFF;
-            animation: animStar 100s linear infinite;
-        }
-        #stars:after {
-            content: " "; position: absolute; top: 2000px; width: 1px; height: 1px;
-            background: transparent;
-            box-shadow: 10px 10px #FFF, 20px 50px #FFF, 100px 80px #FFF, 250px 10px #FFF, 400px 400px #FFF, 20px 500px #FFF, 150px 200px #FFF;
-        }
-        @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-
-        /* --- CONTENEDOR PRINCIPAL --- */
-        .container {
+        /* --- PANTALLA DE BLOQUEO (ARRASTRAR) --- */
+        #lock-screen {
             position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            width: 90%;
-            z-index: 10;
-            transition: opacity 0.8s ease;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            transition: opacity 1s ease;
         }
 
-        /* --- PANTALLA 1: BOTÓN --- */
-        #intro-screen h1 {
-            font-family: 'Dancing Script', cursive;
-            font-size: 2.5rem;
-            margin-bottom: 40px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
-            line-height: 1.2;
-        }
-
-        /* Diseño del botón optimizado para dedo */
-        button {
-            padding: 18px 60px; /* Botón grande para fácil toque */
+        .instruction {
+            margin-bottom: 50px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
             font-size: 1.2rem;
-            font-family: 'Montserrat', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            color: white;
-            cursor: pointer;
-            border-radius: 50px;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        /* Zona de destino */
+        #drop-zone {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #ff4d4d;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 50px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
             transition: 0.3s;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-            outline: none;
+            background: rgba(50, 0, 0, 0.5);
+        }
+        
+        #drop-zone.highlight {
+            background: rgba(100, 0, 0, 0.8);
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
+            transform: scale(1.1);
+            border-style: solid;
         }
 
-        button:active {
-            transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.3);
+        #drop-text {
+            font-size: 0.8rem;
+            color: #ff9999;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* --- PANTALLA 2: CARTA --- */
+        /* El beso arrastrable */
+        #draggable-kiss {
+            font-size: 4rem;
+            cursor: grab;
+            position: relative; /* Necesario para moverlo */
+            transition: transform 0.1s;
+            animation: pulse 2s infinite;
+            z-index: 30;
+            touch-action: none; /* Crucial para móviles */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 10px red); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- PANTALLA DE LA CARTA --- */
         #letter-screen {
-            display: none;
-            opacity: 0;
-            position: fixed;
+            position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); /* Fondo oscuro para leer mejor */
-            backdrop-filter: blur(5px);
-            overflow-y: scroll; /* Permite scroll en móviles */
-            -webkit-overflow-scrolling: touch; /* Scroll suave en iPhone */
-            transition: opacity 1.5s ease;
-            z-index: 20;
+            display: none;
+            opacity: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10;
+            transition: opacity 2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .paper {
-            background: #fffdf7;
-            color: #1a1a1a;
-            padding: 40px 25px;
+        .card {
+            background: linear-gradient(135deg, #1a0505 0%, #2d0a0a 100%);
+            padding: 40px 30px;
             width: 80%;
-            max-width: 500px;
-            margin: 40px auto 80px auto; /* Margen abajo extra para scrolling */
-            border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 400px;
+            border-radius: 2px;
+            border: 1px solid #4a1c1c;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.15);
+            text-align: center;
             position: relative;
         }
 
-        /* Detalle dorado arriba */
-        .paper::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 20px; right: 20px;
-            height: 4px;
-            background: #d4af37;
-            opacity: 0.5;
+        .card h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #ff3333;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
         }
 
-        .paper h2 {
-            font-family: 'Dancing Script', cursive;
-            font-size: 2.2rem;
-            color: #b04e4e;
-            text-align: center;
-            margin-top: 10px;
-            margin-bottom: 25px;
-        }
-
-        .paper p {
-            font-family: 'Lora', serif;
-            font-size: 1.05rem;
-            line-height: 1.7;
+        .card p {
+            font-size: 1.1rem;
+            line-height: 1.8;
             margin-bottom: 20px;
-            text-align: left;
-            color: #444;
+            color: #e0e0e0;
+            font-weight: 300;
         }
 
-        .signature {
-            font-family: 'Lora', serif;
-            font-style: italic;
-            text-align: right;
-            margin-top: 30px;
-            font-size: 0.9rem;
-            color: #666;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+        .highlight-text {
+            color: #ff6666;
+            font-weight: 400;
         }
 
-        /* Player oculto pero funcional */
-        #player {
+        /* --- LLUVIA DE BESOS --- */
+        .kiss-rain {
             position: absolute;
-            top: -9999px;
-            left: -9999px;
-            pointer-events: none;
+            top: -50px;
+            font-size: 2rem;
+            z-index: 5;
+            animation: fall linear forwards;
         }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        #player { position: absolute; visibility: hidden; }
     </style>
 </head>
 <body>
 
-    <div id="stars"></div>
-
-    <!-- Pantalla de Inicio -->
-    <div id="intro-screen" class="container">
-        <h1>Una carta de Chacarita</h1>
-        <!-- El evento onclick dispara todo -->
-        <button id="start-btn" onclick="startExperience()">Leer</button>
+    <!-- PANTALLA 1: ARRASTRAR -->
+    <div id="lock-screen">
+        <div id="drop-zone">
+            <span id="drop-text">Arrastra aquí</span>
+        </div>
+        <div class="instruction">Dame un beso para leer...</div>
+        
+        <!-- El elemento que se mueve -->
+        <div id="draggable-kiss">💋</div>
     </div>
 
-    <!-- Pantalla de la Carta -->
+    <!-- PANTALLA 2: CARTA -->
     <div id="letter-screen">
-        <div class="paper">
-            <h2>Nuestro Amor de Verano</h2>
-            
-            <p>Tus caricias ablandaron mi alma cuando pensé que estaba rígida para el amor.</p>
-            
-            <p>Quizás fue tu concepto de la pelotita, cuando le diste agua a aquel animalito con sed cuando salimos a correr, o tu amor cuando ofreciste cocinarme aquella noche en casa, lo que me hizo verte irresistible.</p>
-            
-            <p>Gracias por darme el lugar para ser tuyo y entregarte mi alma durante el tiempo que compartimos. Fue una experiencia sublime haber entrelazado nuestros corazones en esos abrazos eternos llenos de paz cuando estábamos juntos. Tendré para siempre con el más cálido recuerdo a esa mujer empática, inteligente y risueña, que hizo que hoy, un domingo de marzo le esté escribiendo estas palabras, mientras me castiga la gripe, y un poco la nostalgia de escuchar tu voz.</p>
-            
-            <p>Aunque por hoy nos despidamos de nuestro amor, siempre va a quedar en mí la marca de tus besos, y algunos rastros de tu calor.</p>
-            
-            <div class="signature">
-                - De Lucas, para esa mujer que casi asesino con mis fideos y me conquistaba con sus mimos; Aldana.
-            </div>
+        <div class="card">
+            <h1>Extraño</h1>
+            <p>Como extraño sentir de noche conmigo tu piel</p>
+            <p>y que me acaricies</p>
+            <p class="highlight-text">y que yo te muerda</p>
             <br>
+            <p>y desvelarnos sin saber qué más hacer</p>
+            <p>y solucionarlo</p>
+            <p class="highlight-text">con algunos besos..</p>
         </div>
     </div>
 
-    <!-- Contenedor API YouTube -->
     <div id="player"></div>
 
     <script>
+        // --- LÓGICA DE YOUTUBE ---
         var player;
-        var isPlayerReady = false;
-
-        // 1. Cargar API de YouTube
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // 2. Configuración cuando la API está lista
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                height: '1', // Pequeño truco para que exista en el DOM
-                width: '1',
-                videoId: 'Eloj-b6pRQI', // Canción de Ela Taubert
-                playerVars: {
-                    'playsinline': 1, // CRUCIAL PARA IPHONE: evita pantalla completa
-                    'controls': 0,
-                    'showinfo': 0,
-                    'rel': 0,
-                    'origin': window.location.origin
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
+                height: '0', width: '0',
+                videoId: 'yI3cdm3CVWs', // A Fuego - Bizarrap Remix
+                playerVars: { 'playsinline': 1, 'controls': 0, 'rel': 0, 'showinfo': 0, 'start': 0 }
             });
         }
 
-        function onPlayerReady(event) {
-            isPlayerReady = true;
-            // Opcional: bajar volumen inicial por si acaso
-            event.target.setVolume(100);
+        // --- LÓGICA DE ARRASTRAR (DRAG & DROP TÁCTIL) ---
+        const kiss = document.getElementById('draggable-kiss');
+        const dropZone = document.getElementById('drop-zone');
+        const lockScreen = document.getElementById('lock-screen');
+        const letterScreen = document.getElementById('letter-screen');
+
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        // Eventos para Celular (Touch)
+        kiss.addEventListener('touchstart', startDrag, {passive: false});
+        kiss.addEventListener('touchmove', moveDrag, {passive: false});
+        kiss.addEventListener('touchend', endDrag);
+
+        // Eventos para PC (Mouse)
+        kiss.addEventListener('mousedown', startDragMouse);
+
+        function startDrag(e) {
+            e.preventDefault(); // Evitar scroll
+            isDragging = true;
+            let touch = e.touches[0];
+            
+            // Guardar posición inicial relativa
+            const rect = kiss.getBoundingClientRect();
+            startX = touch.clientX - rect.left;
+            startY = touch.clientY - rect.top;
+            
+            kiss.style.position = 'fixed'; // Cambiar a fixed para mover libremente
+            kiss.style.left = rect.left + 'px';
+            kiss.style.top = rect.top + 'px';
+            kiss.style.zIndex = 100;
         }
 
-        // 3. Función Maestra activada por el toque del usuario
-        function startExperience() {
-            // A. Manejo del Audio (Prioridad)
-            if (isPlayerReady && player) {
-                // playVideo debe llamarse DIRECTAMENTE tras el clic
-                player.playVideo();
-                player.unMute(); // Asegurar que no esté silenciado
+        function moveDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            let touch = e.touches[0];
+            
+            kiss.style.left = (touch.clientX - startX) + 'px';
+            kiss.style.top = (touch.clientY - startY) + 'px';
+
+            checkCollision(touch.clientX, touch.clientY);
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            // Verificar si soltó dentro
+            const kissRect = kiss.getBoundingClientRect();
+            const zoneRect = dropZone.getBoundingClientRect();
+            
+            // Centro del beso
+            const centerX = kissRect.left + kissRect.width / 2;
+            const centerY = kissRect.top + kissRect.height / 2;
+
+            if (centerX > zoneRect.left && centerX < zoneRect.right &&
+                centerY > zoneRect.top && centerY < zoneRect.bottom) {
+                unlockSuccess();
+            } else {
+                // Volver a posición original si falló
+                kiss.style.position = 'relative';
+                kiss.style.left = 'auto';
+                kiss.style.top = 'auto';
+                dropZone.classList.remove('highlight');
+            }
+        }
+
+        // Lógica simple para Mouse (PC)
+        function startDragMouse(e) {
+            e.preventDefault();
+            let rect = kiss.getBoundingClientRect();
+            let shiftX = e.clientX - rect.left;
+            let shiftY = e.clientY - rect.top;
+
+            kiss.style.position = 'absolute';
+            kiss.style.zIndex = 1000;
+
+            function moveAt(pageX, pageY) {
+                kiss.style.left = pageX - shiftX + 'px';
+                kiss.style.top = pageY - shiftY + 'px';
             }
 
-            // B. Manejo de la Animación Visual
-            const intro = document.getElementById('intro-screen');
-            const letter = document.getElementById('letter-screen');
+            function onMouseMove(event) {
+                moveAt(event.pageX, event.pageY);
+                // Chequear colisión visual
+                const zoneRect = dropZone.getBoundingClientRect();
+                if(event.pageX > zoneRect.left && event.pageX < zoneRect.right && 
+                   event.pageY > zoneRect.top && event.pageY < zoneRect.bottom) {
+                    dropZone.classList.add('highlight');
+                } else {
+                    dropZone.classList.remove('highlight');
+                }
+            }
 
-            // Desaparece botón
-            intro.style.opacity = '0';
-            
+            document.addEventListener('mousemove', onMouseMove);
+
+            kiss.onmouseup = function(event) {
+                document.removeEventListener('mousemove', onMouseMove);
+                kiss.onmouseup = null;
+                
+                // Verificar éxito
+                const zoneRect = dropZone.getBoundingClientRect();
+                if(event.pageX > zoneRect.left && event.pageX < zoneRect.right && 
+                   event.pageY > zoneRect.top && event.pageY < zoneRect.bottom) {
+                    unlockSuccess();
+                } else {
+                    kiss.style.position = 'relative';
+                    kiss.style.left = 'auto';
+                    kiss.style.top = 'auto';
+                    dropZone.classList.remove('highlight');
+                }
+            };
+        }
+
+        function checkCollision(x, y) {
+            const rect = dropZone.getBoundingClientRect();
+            if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom) {
+                dropZone.classList.add('highlight');
+            } else {
+                dropZone.classList.remove('highlight');
+            }
+        }
+
+        // --- FUNCIÓN DE ÉXITO ---
+        function unlockSuccess() {
+            // 1. Reproducir Música
+            if(player && player.playVideo) {
+                player.setVolume(100);
+                player.playVideo();
+            }
+
+            // 2. Lluvia de Besos
+            createKissRain();
+
+            // 3. Transición de Pantalla
+            lockScreen.style.opacity = '0';
             setTimeout(() => {
-                intro.style.display = 'none';
-                
-                // Aparece carta
-                letter.style.display = 'block';
-                
-                // Pequeño delay para el efecto fade-in suave
+                lockScreen.style.display = 'none';
+                letterScreen.style.display = 'flex';
                 setTimeout(() => {
-                    letter.style.opacity = '1';
-                }, 50);
-                
+                    letterScreen.style.opacity = '1';
+                }, 100);
             }, 800);
+        }
+
+        function createKissRain() {
+            const emojis = ['💋', '👄', '🔥', '❤️'];
+            for (let i = 0; i < 50; i++) {
+                const k = document.createElement('div');
+                k.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                k.classList.add('kiss-rain');
+                k.style.left = Math.random() * 100 + 'vw';
+                k.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                k.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+                document.body.appendChild(k);
+            }
         }
     </script>
 </body>
